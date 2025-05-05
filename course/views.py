@@ -7,7 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate
 from .forms import SignUpForm, LoginForm
 import smtplib
-
+from django.core.mail import send_mail
+from django.conf import settings
 
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
@@ -201,22 +202,14 @@ def subscribe(request):
         Пароль для входа
         {user_obj.password} 
         """
-
-
-        letter = f"""\
-        From: request-profpromeco@yandex.ru
-        To: {user_obj.email}
-        Subject: Вход в СДО
-        Content-Type: text/plain; charset="UTF-8";
-
-        {msg}"""
-        letter= letter.encode("UTF-8")
-
-
-
-        send_mail_subscribe(user_obj.email,
-                            letter
-                            )
+        print(user_obj.email)
+        send_mail(
+            "Логин и пароль от системы СДО",
+            msg,
+            f"{settings.EMAIL_HOST_USER}",
+            [f"{user_obj.email}"],
+            fail_silently=False,
+        )
 
         if len(UsersCourseSubscribe.objects.filter(user=user_obj
                 , course=course_new)) == 0:
