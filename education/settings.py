@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-o3%6_@gl8bqdmj=45w_dv#6@rqll60@#5eumr8w6ocyr86r4yr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.iprofpromeducation.pro','iprofpromeducation.pro', '127.0.0.1']
+ALLOWED_HOSTS = ['www.iprofpromeducation.pro', 'iprofpromeducation.pro', '127.0.0.1']
 
 # Application definition
 
@@ -57,7 +57,9 @@ ROOT_URLCONF = 'education.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates', 'documents'],
+        'DIRS': ['templates', 'documents',
+                 BASE_DIR / 'course/templates/course'
+                 ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -134,5 +136,3 @@ EMAIL_HOST_PASSWORD = 'wywofakpykdksxgo'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
 EMAIL_ADMIN = EMAIL_HOST_USER
-
-
