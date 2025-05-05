@@ -11,7 +11,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+    from django.conf import settings
+    return HttpResponse("Hello, world. You're at the polls index. " + str(settings.BASE_DIR) )
 
 
 def login_view(request):
