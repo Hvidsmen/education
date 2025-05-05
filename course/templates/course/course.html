@@ -1,0 +1,49 @@
+{% extends 'course/base.html' %}
+{% load static %}
+{% block content %}
+
+<br>
+<div class="container bg-light rounded-1">
+    <div class="row">
+        <div class="col">
+            <h3>{{ course.name }}</h3>
+        </div>
+    </div>
+     <div class="row">
+        <div class="col">
+            <h3>
+                <button class="btn btn-primary"><a href="{% url 'course_test' course.id %}" class="link-light link-no-underline">Пройти тест</a></button>
+            </h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            {% for key, course_f in course_files.items %}
+            <br>
+            <h4>{{ key }}</h4>
+            {% for c in course_f %}
+            <div class="row">
+                <div class="col-1">
+                    <img src="{% static '/img/icons8-document-50.png' %}">
+                </div>
+                <div class="col align-self-center">
+                    <h3>{{ c.name }}</h3>
+                </div>
+                <div class="col col-2 text-end">
+                    <button class="btn btn-light btn-large">
+                        <a href="{{ c.file.url }}" target="_blank"
+                           class="link-dark link-no-underline">
+                            <img src="{% static '/img/icons8-eye-30.png' %}">
+                            Посмотреть
+                        </a>
+                    </button>
+                </div>
+            </div>
+            <br>
+
+            {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
