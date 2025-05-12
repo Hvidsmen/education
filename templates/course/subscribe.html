@@ -92,6 +92,15 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        <div class="col">
+                            <label for="course" class="form-label">Курс</label>
+                            <select class="form-select" name="course_filter" >
+                                <option selected value="NA">...</option>
+                                {% for s in courses_list%}
+                                <option value="{{ s.id }}">{{ s.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
 
                     </div>
                 </div>

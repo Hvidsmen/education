@@ -49,12 +49,12 @@ def list_course(request):
     if user_obj.rules.name == 'Администратор':
         course = Course.objects.all()
         return render(request, "course/admin_course_list.html",
-               {"courses": course, 'is_admin': is_admin(user_obj), 'user_sdo': user_obj})
+                      {"courses": course, 'is_admin': is_admin(user_obj), 'user_sdo': user_obj})
 
     elif user_obj.rules.name == 'Наблюдатель':
 
         course_user_id = [u.course.id for u in UsersCourseSubscribe.objects.filter(user=user_obj)]
-        
+
         course = Course.objects.filter(id__in=course_user_id)
 
         return render(request, "course/course_list.html",
@@ -202,9 +202,25 @@ def send_mail_subscribe(email_to, message):
 def list_course_view(req):
     user = get_user(req)
     user_comp = User.objects.filter(company=user.company)
-    user_course_comp = UsersCourseSubscribe.objects.filter(user__in=user_comp).order_by('course', 'date_end')
+    company_id_filter = req.POST.get('company_filter', 'NA')
+
+    if company_id_filter == 'NA':
+        user_companies = User.objects.all()
+    else:
+        user_companies = User.objects.filter(company=company_id_filter)
+
+    course_id_filter = req.POST.get('course_filter', 'NA')
+    if course_id_filter == 'NA':
+        course_filter = Course.objects.all()
+    else:
+        course_filter = Course.objects.filter(id=course_id_filter)
+    user_course_comp = UsersCourseSubscribe.objects.filter(user__in=user_comp, course__in=course_filter).order_by(
+        'course', 'date_end')
+    courses_list = Course.objects.all()
+    company_list = Company.objects.all()
     return render(req, "course/list_course_comp.html",
-                  {'user_course_comp': user_course_comp, 'user_sdo': user})
+                  {'user_course_comp': user_course_comp, 'user_sdo': user, 'company_list': company_list,
+                   'courses_list': courses_list})
 
 
 def subscribe(request):
@@ -214,12 +230,20 @@ def subscribe(request):
         return login_view(request)
 
     company_id_filter = request.POST.get('company_filter', 'NA')
+
     if company_id_filter == 'NA':
         user_companies = User.objects.all()
     else:
         user_companies = User.objects.filter(company=company_id_filter)
 
-    user_course = UsersCourseSubscribe.objects.filter(user__in=user_companies).order_by('course', 'date_end')
+    course_id_filter = request.POST.get('course_filter', 'NA')
+    if course_id_filter == 'NA':
+        course_filter = Course.objects.all()
+    else:
+        course_filter = Course.objects.filter(id=course_id_filter)
+
+    user_course = UsersCourseSubscribe.objects.filter(user__in=user_companies, course__in=course_filter).order_by(
+        'course', 'date_end')
     status_user = StatusUserCourse.objects.filter(is_for_action_amdin=1)
 
     new_status = request.POST.get('new_status', 'NA')
