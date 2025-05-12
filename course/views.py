@@ -5,7 +5,7 @@ from django.http import Http404
 from datetime import datetime, timedelta
 
 from django.contrib.auth import login, authenticate
-from .forms import  LoginForm
+from .forms import LoginForm
 import smtplib
 from django.core.mail import send_mail
 from django.conf import settings
@@ -26,8 +26,7 @@ def login_view(request):
             if user is not None:
                 login(request, user)  # Выполняем вход
                 return list_course(request)  # Перенаправляем на главную страницу
-    return  render(request, "course/login.html", {'form': form, 'is_admin': 0})
-
+    return render(request, "course/login.html", {'form': form, 'is_admin': 0})
 
 
 def get_user(req):
@@ -47,11 +46,26 @@ def list_course(request):
         return login_view(request)
     user_obj = get_user(request)
 
-    course_user_id = [u.course.id for u in UsersCourseSubscribe.objects.filter(user=user_obj)]
-    course = Course.objects.filter(id__in=course_user_id)
+    if user_obj.rules.name == 'Администратор':
+        course = Course.objects.all()
+        return render(request, "course/admin_course_list.html",
+               {"courses": course, 'is_admin': is_admin(user_obj), 'user_sdo': user_obj})
 
-    return render(request, "course/course_list.html",
-                  {"courses": course, 'is_admin': is_admin(user_obj), 'user_sdo': user_obj})
+    elif user_obj.rules.name == 'Наблюдатель':
+
+        course_user_id = [u.course.id for u in UsersCourseSubscribe.objects.filter(user=user_obj)]
+        
+        course = Course.objects.filter(id__in=course_user_id)
+
+        return render(request, "course/course_list.html",
+                      {"courses": course, 'is_admin': is_admin(user_obj), 'user_sdo': user_obj})
+
+    elif user_obj.rules.name == 'Студент':
+        statuses = StatusUserCourse.objects.filter(name__in=['Завершил успешно', 'Проходит', 'Подписан'])
+        course = UsersCourseSubscribe.objects.filter(user=user_obj, status__in=statuses)
+
+        return render(request, "course/course_list_student.html",
+                      {"courses": course, 'is_admin': is_admin(user_obj), 'user_sdo': user_obj})
 
 
 def course(request, course_id):
@@ -68,6 +82,7 @@ def course(request, course_id):
 
             content[sub_title] = course_files
         user_obj = get_user(request)
+
         return render(request, "course/course.html",
                       {"course_files": content, 'course': course, 'is_admin': is_admin(user_obj), 'user_sdo': user_obj})
 
@@ -94,7 +109,6 @@ def get_course_test(course_id):
     for tq in test_q:
         test_a = TesstQuestionAnswer.objects.filter(test_aswer=tq.id).order_by('ordered')
         test[tq] = test_a
-    print(test)
     return course, test
 
 
@@ -114,27 +128,32 @@ def course_test_from(request, course_id):
 def course_result_test(request):
     if request.user.is_authenticated == False:
         return login_view(request)
+    print(request.POST)
+    print("result test")
     course_id = request.POST.get("course_id", "Undefined")
 
     course, _ = get_course_test(course_id)
 
-    is_all_true = 1
-
     test_obj = Test.objects.get(course=course_id)
     questions = TestQuestion.objects.filter(test=test_obj.id)
 
+    is_all_true = 1
+    cnt_answer = 0
     for questuion in questions:
         answer_users = request.POST.getlist(f'{questuion.id}', [])
-        if len(answer_users) == 0:
-            is_all_true = 0
-            break
-        answer_true = {f'{q.id}' for q in TesstQuestionAnswer.objects.filter(test_aswer=questuion.id, is_true=1)}
 
-        if set(answer_users) == set(answer_true):
-            is_all_true = 1
-        else:
-            is_all_true = 0
-            break
+        if len(answer_users) != 0:
+            cnt_answer += 1
+            answer_true = {f'{q.id}' for q in TesstQuestionAnswer.objects.filter(test_aswer=questuion.id, is_true=1)}
+
+            if set(answer_users) == set(answer_true):
+                pass
+            else:
+                is_all_true = 0
+
+                continue
+
+    is_all_true = 1 if cnt_answer == 10 else 0
 
     res_messeger = 'Сдан' if is_all_true == 1 else 'Не сдан'
     user_obj = get_user(request)
@@ -147,7 +166,7 @@ def course_result_test(request):
     return render(
         request
         , "course/test_course_res.html"
-        , {'course': course,  'res_messeger': res_messeger, 'flag_msg': is_all_true,
+        , {'course': course, 'res_messeger': res_messeger, 'flag_msg': is_all_true,
            'is_admin': is_admin(user_obj), 'user_sdo': user_obj}
     )
 

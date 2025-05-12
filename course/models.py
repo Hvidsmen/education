@@ -68,7 +68,7 @@ class TesstQuestionAnswer(models.Model):
     text = models.CharField(max_length=255)
     test_aswer = models.ForeignKey(TestQuestion, on_delete=models.CASCADE)
     ordered = models.IntegerField()
-    is_true = models.IntegerField()
+    is_true = models.IntegerField(default=0)
 
     def __str__(self):
         return f"""{self.test_aswer.label}
