@@ -26,7 +26,7 @@ def login_view(request):
             if user is not None:
                 login(request, user)  # Выполняем вход
                 return list_course(request)  # Перенаправляем на главную страницу
-    return render(request, 'course\login.html', {'form': form, 'is_admin': 0})
+    return render(request, 'course/login.html', {'form': form, 'is_admin': 0})
 
 
 def get_user(req):
