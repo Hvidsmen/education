@@ -1,11 +1,11 @@
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render
 from .models import *
 from django.http import Http404
 from datetime import datetime, timedelta
-from django.contrib.auth.decorators import login_required
+
 from django.contrib.auth import login, authenticate
-from .forms import SignUpForm, LoginForm
+from .forms import  LoginForm
 import smtplib
 from django.core.mail import send_mail
 from django.conf import settings
@@ -26,7 +26,8 @@ def login_view(request):
             if user is not None:
                 login(request, user)  # Выполняем вход
                 return list_course(request)  # Перенаправляем на главную страницу
-    return render(request, 'course/login.html', {'form': form, 'is_admin': 0})
+    return  render(request, "course/login.html", {'form': form, 'is_admin': 0})
+
 
 
 def get_user(req):
