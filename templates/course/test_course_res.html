@@ -1,0 +1,26 @@
+{% extends 'course/base.html' %}
+
+{% block content %}
+<br>
+<div class="container bg-light rounded-1">
+    <div class="row">
+        <div class="col">
+            <h3>{{ course.name }}</h3>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col">
+
+            {% if flag_msg == 0%}
+            <h3 class="text-danger">Результат: {{ res_messeger }}</h3>
+            {% endif %}
+            {% if flag_msg == 1%}
+            <h3 class="text-success">Результат: {{ res_messeger }}</h3>
+            {% endif %}
+        </div>
+    </div>
+    <br>
+</div>
+
+{% endblock %}

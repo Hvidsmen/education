@@ -10,23 +10,60 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-5">
+        <div class="col">
             <form method="post" action="{% url 'subscribe' %}">
                 {% csrf_token %}
-                <label for="exampleInputEmail1" class="form-label">Адрес электронной почты</label>
-                <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-                       name="email">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <label for="Name" class="form-label">ФИО</label>
+                            <input class="form-control" id="Name"
+
+                                   name="name_new">
+                        </div>
+                        <div class="col">
+                            <label for="exampleInputEmail1" class="form-label">Адрес электронной почты</label>
+                            <input type="email" class="form-control" id="exampleInputEmail1"
+                                   aria-describedby="emailHelp"
+                                   name="email">
+                        </div>
+                        <div class="col">
+                            <label for="course" class="form-label">Компания</label>
+                            <select class="form-select" aria-label="..." name="company_new" id="company">
+                                <option selected value="NA">...</option>
+                                {% for s in company_list%}
+                                <option value="{{ s.id }}">{{ s.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label for="course" class="form-label">Курс</label>
+                            <select class="form-select" aria-label="..." name="course_new" id="course">
+                                <option selected value="NA">...</option>
+                                {% for s in courses_list%}
+                                <option value="{{ s.id }}">{{ s.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label for="course" class="form-label">Права</label>
+                            <select class="form-select" aria-label="..." name="rule_new" id="rule">
+                                <option selected value="NA">...</option>
+                                {% for s in rules_lst%}
+                                <option value="{{ s.id }}">{{ s.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 <br>
-                <label for="course" class="form-label">Курс</label>
-                <select class="form-select" aria-label="..." name="course_new" id="course">
-                    <option selected value="NA">...</option>
-                    {% for s in courses_list%}
-                    <option value="{{ s.id }}">{{ s.name }}</option>
-                    {% endfor %}
-                </select>
-                <br>
-                <input type="hidden" value="subscribe_user" name="subsribe_user">
-                <input type="submit" value="Изменить" class="btn btn-primary">
+                <div class="row">
+                    <div class="col">
+                        <input type="hidden" value="subscribe_user" name="subsribe_user">
+                        <input type="submit" value="Подписать" class="btn btn-primary">
+                    </div>
+                </div>
+
 
             </form>
         </div>
@@ -37,12 +74,55 @@
 <div class="container bg-light rounded-1">
     <div class="row">
         <div class="col">
+            <h5>Фильтр</h5>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-5">
+            <form method="post" action="{% url 'subscribe' %}">
+                {% csrf_token %}
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <label for="course" class="form-label">Компания</label>
+                            <select class="form-select" name="company_filter" >
+                                <option selected value="NA">...</option>
+                                {% for s in company_list%}
+                                <option value="{{ s.id }}">{{ s.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col">
+                        <input type="hidden" value="filter" name="subsribe_user">
+                        <input type="submit" value="Фильтр" class="btn btn-primary">
+                    </div>
+                </div>
+
+
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<br>
+<div class="container bg-light rounded-1">
+    <div class="row">
+        <div class="col">
             <br>
             <table class="table">
                 <thead>
                 <tr>
                     <th scope="col">Курс</th>
+                    <th scope="col">ФИО</th>
+                    <th scope="col">Компания</th>
                     <th scope="col">Email</th>
+                    <th scope="col">Права</th>
                     <th scope="col">Дата начала</th>
                     <th scope="col">Дата окончания</th>
                     <th scope="col">Статус</th>
@@ -53,7 +133,10 @@
                 {% for user in user_course %}
                 <tr>
                     <th scope="row">{{ user.course.name }}</th>
+                    <td>{{ user.user.fio }}</td>
+                    <td>{{ user.user.company }}</td>
                     <td>{{ user.user.email }}</td>
+                    <td>{{ user.user.rules }}</td>
                     <td>{{ user.date_start }}</td>
                     <td>{{ user.date_end }}</td>
                     <td>{{ user.status.name }}</td>

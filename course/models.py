@@ -71,7 +71,8 @@ class TesstQuestionAnswer(models.Model):
     is_true = models.IntegerField()
 
     def __str__(self):
-        return self.text
+        return f"""{self.test_aswer.label}
+{self.text}"""
 
 
 class Rule(models.Model):
@@ -82,11 +83,26 @@ class Rule(models.Model):
         return self.name
 
 
+class Company(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
+
+from django.contrib.auth.models import User as UserSyst
+
+
 class User(models.Model):
     email = models.CharField(max_length=255, primary_key=True)
     password = models.CharField(max_length=255)
-
+    fio = models.CharField(max_length=500, null=True)
+    login = models.CharField(max_length=500, null=True)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
     rules = models.ForeignKey(Rule, null=True, on_delete=models.CASCADE)
+
+    user_syst = models.ForeignKey(UserSyst, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.email

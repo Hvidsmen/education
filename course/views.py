@@ -10,9 +10,10 @@ import smtplib
 from django.core.mail import send_mail
 from django.conf import settings
 
+
 def index(request):
     from django.conf import settings
-    return HttpResponse("Hello, world. You're at the polls index. " + str(settings.BASE_DIR) )
+    return HttpResponse("Hello, world. You're at the polls index. " + str(settings.BASE_DIR))
 
 
 def login_view(request):
@@ -48,7 +49,8 @@ def list_course(request):
     course_user_id = [u.course.id for u in UsersCourseSubscribe.objects.filter(user=user_obj)]
     course = Course.objects.filter(id__in=course_user_id)
 
-    return render(request, "course/course_list.html", {"courses": course, 'is_admin': is_admin(user_obj)})
+    return render(request, "course/course_list.html",
+                  {"courses": course, 'is_admin': is_admin(user_obj), 'user_sdo': user_obj})
 
 
 def course(request, course_id):
@@ -66,10 +68,13 @@ def course(request, course_id):
             content[sub_title] = course_files
         user_obj = get_user(request)
         return render(request, "course/course.html",
-                      {"course_files": content, 'course': course, 'is_admin': is_admin(user_obj)})
+                      {"course_files": content, 'course': course, 'is_admin': is_admin(user_obj), 'user_sdo': user_obj})
 
     except Course.DoesNotExist:
         raise Http404("Question does not exist")
+
+
+import random
 
 
 def get_course_test(course_id):
@@ -77,16 +82,18 @@ def get_course_test(course_id):
     test_obj = Test.objects.get(course=course_id)
     test = {}
 
-    test_sub = TestSub.objects.filter(course=course_id).order_by('ordered')
-    for ts in test_sub:
-        test[ts] = []
-        test_q = TestQuestion.objects.filter(test=test_obj.id, test_sub=ts.id).order_by('ordered')
-        tq_dict = {}
-        for tq in test_q:
-            test_a = TesstQuestionAnswer.objects.filter(test_aswer=tq.id).order_by('ordered')
+    test_q_ = list(TestQuestion.objects.filter(test=test_obj.id).order_by('ordered'))
 
-            tq_dict[tq] = test_a
-        test[ts].append(tq_dict)
+    test_q = []
+    for _ in range(min(10, len(test_q_))):
+        q_c = random.choice(test_q_)
+        test_q.append(q_c)
+        test_q_.remove(q_c)
+
+    for tq in test_q:
+        test_a = TesstQuestionAnswer.objects.filter(test_aswer=tq.id).order_by('ordered')
+        test[tq] = test_a
+    print(test)
     return course, test
 
 
@@ -99,7 +106,7 @@ def course_test_from(request, course_id):
     return render(
         request
         , "course/test_course.html"
-        , {'course': course, 'test': test, 'is_admin': is_admin(user_obj)}
+        , {'course': course, 'test': test, 'is_admin': is_admin(user_obj), 'user_sdo': user_obj}
     )
 
 
@@ -108,7 +115,7 @@ def course_result_test(request):
         return login_view(request)
     course_id = request.POST.get("course_id", "Undefined")
 
-    course, test = get_course_test(course_id)
+    course, _ = get_course_test(course_id)
 
     is_all_true = 1
 
@@ -138,22 +145,27 @@ def course_result_test(request):
 
     return render(
         request
-        , "course/test_course.html"
-        , {'course': course, 'test': test, 'res_messeger': res_messeger, 'flag_msg': is_all_true,
-           'is_admin': is_admin(user_obj)}
+        , "course/test_course_res.html"
+        , {'course': course,  'res_messeger': res_messeger, 'flag_msg': is_all_true,
+           'is_admin': is_admin(user_obj), 'user_sdo': user_obj}
     )
 
 
 from django.contrib.auth.models import User as UserDj
 
 
-def create_user(email):
+def create_user(fio, email, company, rule):
     password_ = email.split('@')[0][:5] + 'qazwsx!su'
     login = email.split('@')[0]
-    rule = Rule.objects.get(name='Студент')
-    user_obj = User.objects.create(email=email, password=password_, rules=rule)
+    rule = Rule.objects.get(id=rule)
+    company = Company.objects.get(id=company)
 
-    user_obj_d = UserDj.objects.create(login=login, email=email, password=password_)
+    user_obj_d = UserDj.objects.create(username=login, email=email, password=password_)
+    user_obj_d.set_password(password_)
+    user_obj_d.save()
+    user_obj = User.objects.create(fio=fio, company=company, email=email, password=password_, rules=rule, login=login,
+                                   user_syst=user_obj_d)
+
     return user_obj
 
 
@@ -166,12 +178,30 @@ def send_mail_subscribe(email_to, message):
     except:
         return 0
 
+
+def list_course_view(req):
+    user = get_user(req)
+    user_comp = User.objects.filter(company=user.company)
+    user_course_comp = UsersCourseSubscribe.objects.filter(user__in=user_comp).order_by('course', 'date_end')
+    return render(req, "course/list_course_comp.html",
+                  {'user_course_comp': user_course_comp, 'user_sdo': user})
+
+
 def subscribe(request):
+    print(request.POST)
+
     if request.user.is_authenticated == False:
         return login_view(request)
-    user_course = UsersCourseSubscribe.objects.all().order_by('course', 'date_end')
+
+    company_id_filter = request.POST.get('company_filter', 'NA')
+    if company_id_filter == 'NA':
+        user_companies = User.objects.all()
+    else:
+        user_companies = User.objects.filter(company=company_id_filter)
+
+    user_course = UsersCourseSubscribe.objects.filter(user__in=user_companies).order_by('course', 'date_end')
     status_user = StatusUserCourse.objects.filter(is_for_action_amdin=1)
-    courses_list = Course.objects.all()
+
     new_status = request.POST.get('new_status', 'NA')
 
     if new_status != 'NA':
@@ -184,15 +214,17 @@ def subscribe(request):
     if course_new != 'NA':
         course_new = Course.objects.get(pk=course_new)
         email = request.POST.get('email', '')
+        fio = request.POST.get('name_new', '')
+        company = request.POST.get('company_new', '')
+        rule = request.POST.get('rule_new', '')
         try:
             user_obj = User.objects.get(email=email)
         except:
-            user_obj = create_user(email)
+            user_obj = create_user(fio, email, company, rule)
 
         status_obj = StatusUserCourse.objects.get(name='Подписан')
         datestart = datetime.today()
         dateend = datestart + timedelta(days=30)
-
 
         msg = f"""Вы записаны на курс
         {course_new.name}
@@ -221,7 +253,13 @@ def subscribe(request):
                 , date_start=datestart
                 , date_end=dateend
             )
+
     user_obj = get_user(request)
+    courses_list = Course.objects.all()
+    company_list = Company.objects.all()
+    rules_lst = Rule.objects.filter(name__in=['Наблюдатель', 'Студент'])
+
     return render(request, "course/subscribe.html",
-                  {'user_course': user_course, 'status_user': status_user, 'courses_list': courses_list,
-                   'is_admin': is_admin(user_obj)})
+                  {'user_course': user_course, 'rules_lst': rules_lst, 'status_user': status_user,
+                   'courses_list': courses_list,
+                   'is_admin': is_admin(user_obj), 'company_list': company_list, 'user_sdo': user_obj})

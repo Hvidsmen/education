@@ -1,0 +1,46 @@
+{% extends 'course/base.html' %}
+
+
+{% block content %}
+<br>
+
+<br>
+<div class="container bg-light rounded-1">
+    <div class="row">
+        <div class="col">
+            <br>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Курс</th>
+                    <th scope="col">ФИО</th>
+                    <th scope="col">Компания</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Права</th>
+                    <th scope="col">Дата начала</th>
+                    <th scope="col">Дата окончания</th>
+                    <th scope="col">Статус</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in user_course_comp %}
+                <tr>
+                    <th scope="row">{{ user.course.name }}</th>
+                    <td>{{ user.user.fio }}</td>
+                    <td>{{ user.user.company }}</td>
+                    <td>{{ user.user.email }}</td>
+                    <td>{{ user.user.rules }}</td>
+                    <td>{{ user.date_start }}</td>
+                    <td>{{ user.date_end }}</td>
+                    <td>{{ user.status.name }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+
+        </div>
+    </div>
+</div>
+{% endblock %}
