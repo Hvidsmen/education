@@ -76,7 +76,7 @@ TEMPLATES = [
     },
 ]
 
-LOGIN_REDIRECT_URL = 'login/'
+
 
 WSGI_APPLICATION = 'education.wsgi.application'
 
