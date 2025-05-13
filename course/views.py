@@ -290,7 +290,7 @@ def subscribe(request):
 
         if len(UsersCourseSubscribe.objects.filter(user=user_obj
                 , course=course_new)) == 0:
-            
+
             su_obj = UsersCourseSubscribe.objects.create(
                 user=user_obj
                 , course=course_new
