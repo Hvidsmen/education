@@ -278,8 +278,8 @@ def subscribe(request):
         msg = f"""Вы записаны на курс
         {course_new.name}
         Сслыка
-        https://iprofpromeducation.pro/list_course/  
-        
+          
+    
         Почта
         {user_obj.email}
         Логин для входа
