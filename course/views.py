@@ -78,7 +78,7 @@ def course(request, course_id):
         content = {}
         for cid in sub_titles:
             sub_title = CourseSubTitle.objects.get(pk=cid.id)
-            course_files = CourseFile.objects.filter(sub_title=cid.id).order_by('ordered')
+            course_files = CourseFile.objects.filter(sub_title=cid.id, course= course_id).order_by('ordered')
 
             content[sub_title] = course_files
         user_obj = get_user(request)
@@ -272,6 +272,8 @@ def subscribe(request):
 
         msg = f"""Вы записаны на курс
         {course_new.name}
+        Сслыка
+        http://127.0.0.1:8000/admin/course/coursesubtitle/1/change/
         Почта
         {user_obj.email}
         Логин для входа
