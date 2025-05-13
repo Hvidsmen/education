@@ -237,13 +237,18 @@ def subscribe(request):
         user_companies = User.objects.filter(company=company_id_filter)
 
     course_id_filter = request.POST.get('course_filter', 'NA')
+
     if course_id_filter == 'NA':
         course_filter = Course.objects.all()
     else:
         course_filter = Course.objects.filter(id=course_id_filter)
 
-    user_course = UsersCourseSubscribe.objects.filter(user__in=user_companies, course__in=course_filter).order_by(
+    rules_adm = Rule.objects.filter(name='Администратор')
+    user_admin = User.objects.filter(rules__in = rules_adm)
+
+    user_course = UsersCourseSubscribe.objects.filter(user__in=user_companies, course__in=course_filter).exclude(user__in=user_admin).order_by(
         'course', 'date_end')
+
     status_user = StatusUserCourse.objects.filter(is_for_action_amdin=1)
 
     new_status = request.POST.get('new_status', 'NA')
