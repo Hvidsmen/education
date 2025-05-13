@@ -78,7 +78,7 @@ def course(request, course_id):
         content = {}
         for cid in sub_titles:
             sub_title = CourseSubTitle.objects.get(pk=cid.id)
-            course_files = CourseFile.objects.filter(sub_title=cid.id, course= course_id).order_by('ordered')
+            course_files = CourseFile.objects.filter(sub_title=cid.id, course=course_id).order_by('ordered')
 
             content[sub_title] = course_files
         user_obj = get_user(request)
@@ -139,6 +139,7 @@ def course_result_test(request):
 
     is_all_true = 1
     cnt_answer = 0
+    cnt_answer_true = 0
     for questuion in questions:
         answer_users = request.POST.getlist(f'{questuion.id}', [])
 
@@ -147,13 +148,10 @@ def course_result_test(request):
             answer_true = {f'{q.id}' for q in TesstQuestionAnswer.objects.filter(test_aswer=questuion.id, is_true=1)}
 
             if set(answer_users) == set(answer_true):
-                pass
-            else:
-                is_all_true = 0
+                cnt_answer_true +=1
 
-                continue
 
-    is_all_true = 1 if cnt_answer == 10 else 0
+    is_all_true = 1 if cnt_answer_true == 10 else 0
 
     res_messeger = 'Сдан' if is_all_true == 1 else 'Не сдан'
     user_obj = get_user(request)
@@ -167,7 +165,7 @@ def course_result_test(request):
         request
         , "course/test_course_res.html"
         , {'course': course, 'res_messeger': res_messeger, 'flag_msg': is_all_true,
-           'is_admin': is_admin(user_obj), 'user_sdo': user_obj}
+           'is_admin': is_admin(user_obj), 'user_sdo': user_obj, 'cnt_answer':cnt_answer_true}
     )
 
 
@@ -187,8 +185,6 @@ def create_user(fio, email, company, rule):
                                    user_syst=user_obj_d)
 
     return user_obj
-
-
 
 
 def list_course_view(req):
@@ -236,9 +232,10 @@ def subscribe(request):
         course_filter = Course.objects.filter(id=course_id_filter)
 
     rules_adm = Rule.objects.filter(name='Администратор')
-    user_admin = User.objects.filter(rules__in = rules_adm)
+    user_admin = User.objects.filter(rules__in=rules_adm)
 
-    user_course = UsersCourseSubscribe.objects.filter(user__in=user_companies, course__in=course_filter).exclude(user__in=user_admin).order_by(
+    user_course = UsersCourseSubscribe.objects.filter(user__in=user_companies, course__in=course_filter).exclude(
+        user__in=user_admin).order_by(
         'course', 'date_end')
 
     status_user = StatusUserCourse.objects.filter(is_for_action_amdin=1)
@@ -290,7 +287,6 @@ def subscribe(request):
 
         if len(UsersCourseSubscribe.objects.filter(user=user_obj
                 , course=course_new)) == 0:
-
             su_obj = UsersCourseSubscribe.objects.create(
                 user=user_obj
                 , course=course_new
@@ -307,4 +303,35 @@ def subscribe(request):
     return render(request, "course/subscribe.html",
                   {'user_course': user_course, 'rules_lst': rules_lst, 'status_user': status_user,
                    'courses_list': courses_list,
-                   'is_admin': is_admin(user_obj), 'company_list': company_list, 'user_sdo': user_obj})
+                   'is_admin': is_admin(user_obj), 'company_list': company_list, 'is_admin': is_admin(user_obj),
+                   'user_sdo': user_obj})
+
+
+from .forms import CompanyForm
+
+
+def company_view(request):
+    if request.user.is_authenticated == False:
+        return login_view(request)
+    form = CompanyForm()
+    company_list = Company.objects.all()
+    user_obj = get_user(request)
+
+    delete_id_company = request.POST.get('company_delete','NA')
+    if delete_id_company != 'NA':
+      comp_delete = Company.objects.get(id=delete_id_company)
+      comp_delete.delete()
+
+    elif request.method == 'POST':
+        form_add_company = CompanyForm(request.POST)
+
+        name = form_add_company['name'].value()
+        print(name)
+        if len(Company.objects.filter(name=name)) == 0:
+            print(name)
+            c = Company.objects.create(name=name)
+            c.save()
+
+    return render(request, "course/company_add.html",
+                  {'company_list': [], 'form': form, 'company_list': company_list, 'is_admin': is_admin(user_obj),
+                   'user_sdo': user_obj})

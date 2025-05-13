@@ -10,6 +10,7 @@ urlpatterns = [
     path('course_test/result_course', views.course_result_test, name='course_result_test'),
     path('subscribe', views.subscribe, name='subscribe'),
     path('list_course_view', views.list_course_view, name='list_course_view'),
+    path('company_view', views.company_view, name='company_view'),
 
 
     path('login/', views.login_view, name='login'),
