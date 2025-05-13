@@ -189,14 +189,6 @@ def create_user(fio, email, company, rule):
     return user_obj
 
 
-def send_mail_subscribe(email_to, message):
-    try:
-        server = smtplib.SMTP_SSL('smtp.yandex.ru', 465)
-        server.login('request-profpromeco@yandex.ru', 'ijyrxjliicwfkjio')
-        server.sendmail('request-profpromeco@yandex.ru', email_to, message)
-        server.quit()
-    except:
-        return 0
 
 
 def list_course_view(req):
@@ -278,7 +270,7 @@ def subscribe(request):
         msg = f"""Вы записаны на курс
         {course_new.name}
         Сслыка
-          
+          https://iprofpromeducation.pro/list_course/
     
         Почта
         {user_obj.email}
@@ -293,11 +285,12 @@ def subscribe(request):
             msg,
             f"{settings.EMAIL_HOST_USER}",
             [f"{user_obj.email}"],
-            fail_silently=False,
+            fail_silently=True,
         )
 
         if len(UsersCourseSubscribe.objects.filter(user=user_obj
                 , course=course_new)) == 0:
+            
             su_obj = UsersCourseSubscribe.objects.create(
                 user=user_obj
                 , course=course_new
