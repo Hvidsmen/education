@@ -16,4 +16,6 @@ admin.site.register(Rule)
 
 admin.site.register(CourseSubTitle)
 admin.site.register(Company)
+admin.site.register(UserResultTest)
+
 

@@ -11,7 +11,7 @@ urlpatterns = [
     path('subscribe', views.subscribe, name='subscribe'),
     path('list_course_view', views.list_course_view, name='list_course_view'),
     path('company_view', views.company_view, name='company_view'),
-
+    path('result_user_action', views.result_user_action, name='result_user_action'),
 
     path('login/', views.login_view, name='login'),
 

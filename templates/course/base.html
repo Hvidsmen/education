@@ -54,9 +54,14 @@
                             <a href="{% url 'subscribe' %}"
                                class="link-primary link-no-underline">Подписать</a>
                         </button>
-                          <button class="btn btn-light">
+                        <button class="btn btn-light">
                             <a href="{% url 'company_view' %}"
                                class="link-primary link-no-underline">Компании</a>
+                        </button>
+
+                        <button class="btn btn-light">
+                            <a href="{% url 'result_user_action' %}"
+                               class="link-primary link-no-underline">Отчет</a>
                         </button>
 
                     </div>
@@ -78,13 +83,13 @@
                             <div class="row align-items-center text-center">
                                 <div class="col align-self-center">
                                     <img src="{% static '/img/icons8-user-40.png' %}" width="50px"
-                                             height="50px">
+                                         height="50px">
                                 </div>
-                                <div class="col-1"> </div>
+                                <div class="col-1"></div>
                             </div>
                             <div class="row align-items-center">
 
-                                <div class="col text-center align-self-center" >
+                                <div class="col text-center align-self-center">
 
                                     {{ user.get_username }}
                                 </div>
@@ -149,6 +154,7 @@
                                     width: 50px;
                                 }
                             }
+
 
 
 

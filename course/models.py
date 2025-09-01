@@ -104,8 +104,17 @@ class User(models.Model):
 
     user_syst = models.ForeignKey(UserSyst, on_delete=models.CASCADE, null=True)
 
+    is_inter_site = models.IntegerField(default=0, null=True)
+
     def __str__(self):
         return self.email
+
+
+class UserResultTest(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    test = models.ForeignKey(Test, on_delete=models.CASCADE, null=True)
+    date_result = models.DateField(null=True)
+    result = models.FloatField(null=True)
 
 
 class StatusUserCourse(models.Model):

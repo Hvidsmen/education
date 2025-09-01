@@ -137,7 +137,6 @@ def course_result_test(request):
     test_obj = Test.objects.get(course=course_id)
     questions = TestQuestion.objects.filter(test=test_obj.id)
 
-    is_all_true = 1
     cnt_answer = 0
     cnt_answer_true = 0
     for questuion in questions:
@@ -148,13 +147,20 @@ def course_result_test(request):
             answer_true = {f'{q.id}' for q in TesstQuestionAnswer.objects.filter(test_aswer=questuion.id, is_true=1)}
 
             if set(answer_users) == set(answer_true):
-                cnt_answer_true +=1
+                cnt_answer_true += 1
 
-
-    is_all_true = 1 if cnt_answer_true == 10 else 0
-
+    is_all_true = 1 if cnt_answer_true >= 8 else 0
     res_messeger = 'Сдан' if is_all_true == 1 else 'Не сдан'
     user_obj = get_user(request)
+    # write res course
+    obj_res = UserResultTest.objects.create(
+        user=user_obj
+        , test=test_obj
+        , date_result=datetime.today()
+        , result=cnt_answer_true
+    )
+    obj_res.save()
+
     if res_messeger == 'Сдан':
         st = StatusUserCourse.objects.get(name='Завершил успешно')
         uc = UsersCourseSubscribe.objects.get(user=user_obj, course=course)
@@ -165,7 +171,7 @@ def course_result_test(request):
         request
         , "course/test_course_res.html"
         , {'course': course, 'res_messeger': res_messeger, 'flag_msg': is_all_true,
-           'is_admin': is_admin(user_obj), 'user_sdo': user_obj, 'cnt_answer':cnt_answer_true}
+           'is_admin': is_admin(user_obj), 'user_sdo': user_obj, 'cnt_answer': cnt_answer_true}
     )
 
 
@@ -246,6 +252,14 @@ def subscribe(request):
         sub_id = request.POST.get('subscribe_id', 'NA')
         sub_obj = UsersCourseSubscribe.objects.get(pk=sub_id)
         sub_obj.status = StatusUserCourse.objects.get(pk=new_status)
+        if int(new_status) == 1:  # Подписан
+
+            datestart = datetime.today()
+            dateend = datestart + timedelta(days=30)
+
+            sub_obj.date_start = datestart
+            sub_obj.date_end = dateend
+
         sub_obj.save()
 
     course_new = request.POST.get('course_new', 'NA')
@@ -317,10 +331,10 @@ def company_view(request):
     company_list = Company.objects.all()
     user_obj = get_user(request)
 
-    delete_id_company = request.POST.get('company_delete','NA')
+    delete_id_company = request.POST.get('company_delete', 'NA')
     if delete_id_company != 'NA':
-      comp_delete = Company.objects.get(id=delete_id_company)
-      comp_delete.delete()
+        comp_delete = Company.objects.get(id=delete_id_company)
+        comp_delete.delete()
 
     elif request.method == 'POST':
         form_add_company = CompanyForm(request.POST)
@@ -335,3 +349,42 @@ def company_view(request):
     return render(request, "course/company_add.html",
                   {'company_list': [], 'form': form, 'company_list': company_list, 'is_admin': is_admin(user_obj),
                    'user_sdo': user_obj})
+
+
+def result_user_action(request):
+    if request.user.is_authenticated == False:
+        return login_view(request)
+
+    user_obj = get_user(request)
+
+    if request.user.is_authenticated == False:
+        return login_view(request)
+
+    company_id_filter = request.POST.get('company_filter', 'NA')
+
+    if company_id_filter == 'NA':
+        user_companies = User.objects.all()
+    else:
+        user_companies = User.objects.filter(company=company_id_filter)
+
+    course_id_filter = request.POST.get('course_filter', 'NA')
+
+    if course_id_filter == 'NA':
+        course_filter = Course.objects.all()
+    else:
+        course_filter = Course.objects.filter(id=course_id_filter)
+    user_companies_list = []
+    for user in user_companies:
+
+        result_user = UserResultTest.objects.filter(user = user)
+        user_companies_list.append(
+            {'user':user, 'result':result_user}
+        )
+
+    return render(request, "course/result_user_action.html",
+                  {
+                      'is_admin': is_admin(user_obj),
+                      'user_sdo': user_obj,
+                      'users':user_companies_list
+                  }
+                  )
