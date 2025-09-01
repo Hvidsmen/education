@@ -88,6 +88,7 @@
                                 <th scope="col">Курс</th>
                                 <th scope="col">Дата</th>
                                 <th scope="col">Результат</th>
+                                <th scope="col">Результат баллы</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -95,6 +96,7 @@
                             <tr>
                                 <td>{{ result.test.course }}</td>
                                 <td>{{ result.date_result }}</td>
+                                <td>{{ result.result_test }}</td>
                                 <td>{{ result.result }} из 10</td>
                             </tr>
                             {% endfor %}

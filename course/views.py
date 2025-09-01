@@ -162,6 +162,7 @@ def course_result_test(request):
         , test=test_obj
         , date_result=datetime.today()
         , result=cnt_answer_true
+        , result_test=res_messeger
     )
     obj_res.save()
 
