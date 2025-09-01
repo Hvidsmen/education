@@ -25,6 +25,11 @@ def login_view(request):
             user = authenticate(username=username, password=password)  # Проверяем учетные данные
             if user is not None:
                 login(request, user)  # Выполняем вход
+
+                user_obj = User.objects.get(login=user)
+                
+                user_obj.is_inter_site = 1
+                user_obj.save()
                 return list_course(request)  # Перенаправляем на главную страницу
     return render(request, "course/login.html", {'form': form, 'is_admin': 0})
 
@@ -375,16 +380,15 @@ def result_user_action(request):
         course_filter = Course.objects.filter(id=course_id_filter)
     user_companies_list = []
     for user in user_companies:
-
-        result_user = UserResultTest.objects.filter(user = user)
+        result_user = UserResultTest.objects.filter(user=user)
         user_companies_list.append(
-            {'user':user, 'result':result_user}
+            {'user': user, 'result': result_user}
         )
 
     return render(request, "course/result_user_action.html",
                   {
                       'is_admin': is_admin(user_obj),
                       'user_sdo': user_obj,
-                      'users':user_companies_list
+                      'users': user_companies_list
                   }
                   )
