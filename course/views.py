@@ -27,7 +27,6 @@ def login_view(request):
                 login(request, user)  # Выполняем вход
 
                 user_obj = User.objects.get(login=user)
-                
                 user_obj.is_inter_site = 1
                 user_obj.save()
                 return list_course(request)  # Перенаправляем на главную страницу
@@ -376,19 +375,27 @@ def result_user_action(request):
 
     if course_id_filter == 'NA':
         course_filter = Course.objects.all()
+        tests_filter = Test.objects.all()
     else:
         course_filter = Course.objects.filter(id=course_id_filter)
+        tests_filter = Test.objects.filter(course__in=course_filter)
     user_companies_list = []
     for user in user_companies:
-        result_user = UserResultTest.objects.filter(user=user)
+        result_user = UserResultTest.objects.filter(user=user, test__in=tests_filter)
+
         user_companies_list.append(
             {'user': user, 'result': result_user}
         )
+
+    courses_list = Course.objects.all()
+    company_list = Company.objects.all()
 
     return render(request, "course/result_user_action.html",
                   {
                       'is_admin': is_admin(user_obj),
                       'user_sdo': user_obj,
-                      'users': user_companies_list
+                      'users': user_companies_list,
+                      'courses_list': courses_list,
+                      'company_list': company_list
                   }
                   )
