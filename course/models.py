@@ -114,7 +114,7 @@ class UserResultTest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     test = models.ForeignKey(Test, on_delete=models.CASCADE, null=True)
     date_result = models.DateField(null=True)
-    result = models.FloatField(null=True)
+    result = models.IntegerField(null=True)
 
 
 class StatusUserCourse(models.Model):
